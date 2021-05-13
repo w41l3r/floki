@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# FLOKI - the seas of Web Recon automator
+# FLOKI - sailing the seas of Reconnaissance
 #
 # by w41l3r
 
