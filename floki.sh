@@ -1,27 +1,15 @@
 #!/bin/bash
 
 #
-# FLOKI - sailing the seas of Reconnaissance
+# FLOKI - the seas of Web Recon automator
 #
 # by w41l3r
 
-VERSION='0.1'
+VERSION='0.2'
 DEPS="assetfinder wafw00f whatweb"
 HTTPROBE="httprobe"
 REPORT="floki-report-`date +%d%m%y%H%M`.html"
 
-function tryInstall()
-{
-	echo "Package $1 not found. Installing..."
-	sudo apt install $1 -y
-	if [ $? -ne 0 ];then
-		echo
-		echo "[-] Errors installing $1"
-		echo "[!] Please install $1 before using Loki!"
-		echo "[!] Exiting..."
-		exit 1
-	fi
-}
 
 function printBanner()
 {
@@ -38,6 +26,20 @@ echo
 echo " Version: $VERSION"
 echo
 
+}
+
+function tryInstall()
+{
+	echo "Package $1 not found. Installing..."
+	sudo apt install $1 -y
+	if [ $? -ne 0 ];then
+		echo
+		echo "[-] Errors installing $1"
+		echo "[!] Please install $1 before using Loki!"
+		echo "[!] Exiting..."
+		cd ..
+		exit 1
+	fi
 }
 
 function printHelp()
@@ -75,17 +77,80 @@ function generateReport()
 	echo "</P></BODY></HTML>" >> $REPORT
 }
 
+function zoneTransfer()
+{
+	DOMAIN=$1
+	SUBSFILE=$2
+	TEMPFILE="subs_`date +%d%m%y%H%M%S`.tmp"
+
+	host -t NS $DOMAIN |awk '{print $4}'|sed 's/\.$//'|while read namesrv
+	do
+		echo
+		echo -n -e "\e[1;31m [+] Trying zone-transfer using $namesrv ... \e[0m"
+		echo
+		host -l $DOMAIN $namesrv > zonetransfer.out 2>/dev/null
+		if [ $? -ne 0 ]
+		then
+			echo " denied!"
+			sleep 3
+		else
+			echo
+			echo -n -e "\e[1;31m [+] Whoohaaaa! Zone Transfer worked!!! Take a look... \e[0m"
+			echo
+			cat zonetransfer.out
+			cat zonetransfer.out |grep "has address"| awk '{print $1}' |tee -a $SUBSFILE
+			cat $SUBSFILE |sed 's/\.$//' |sort -u > $TEMPFILE && mv $TEMPFILE $SUBSFILE
+			echo
+			echo -n -e "\e[1;31m [+] Take a look at our brand new subdomains found! \e[0m"
+			echo
+			cat $SUBSFILE
+			touch zonexfer.tmp
+		fi
+	done
+}
+
+function reverseLookup()
+{
+	SUBSFILE=$1
+	DOMAIN=$2
+	AUX='subdomains.aux'
+	TEMPFILE="subs_`date +%d%m%y%H%M%S`.tmp"
+	> $TEMPFILE
+
+	cat $SUBSFILE |while read subdomain
+	do
+		host $subdomain >> $TEMPFILE
+	done
+	MOSTRANGE="`cat $TEMPFILE |awk '{print $4}'|cut -f 1,2,3 -d'.' |sort |uniq -c|sort -n |tail -1 |awk '{print $2}'`"
+	echo "Most used ip network is ${MOSTRANGE}.0 . We will use this (/24), but i encourage you to consider the others later..."
+	echo "I'll put some multi-range option for you here some day :)"
+
+	echo "Let's do some reverse DNS resolution. This can take a while... Relax..."
+	for ip in $(seq 2 254); do
+		host ${MOSTRANGE}.${ip} |grep -i $DOMAIN |grep -v "not found"|tee -a $AUX
+	done
+
+	echo
+	echo -e "\e[1;31m [+] I've found these subdomains using reverse DNS lookup. Should we keep them? \e[0m"
+	echo -n -e "\e[1;31m Please choose [Y/n] \e[0m"
+	read RESP
+	case $RESP in
+		y|Y) echo "Merging the subdomains findings..."
+		     cat $AUX |awk '{print $5}' >> $SUBSFILE
+		     cat $SUBSFILE |sort -u |grep -v '\.$' > $TEMPFILE && mv $TEMPFILE $SUBSFILE && rm -f $AUX 
+		     echo
+		     echo -e "\e[1;31m [+] New list of subdomains found: \e[0m"
+		     echo
+		     cat $SUBSFILE
+		;;
+		*) echo "Dropping the subdomains..."; rm -f $AUX;;
+	esac
+	echo
+
+}
+
 printBanner
 
-touch $REPORT 2>/dev/null
-if [ $? -ne 0 ];
-then
-	echo
-	echo -e "\e[1;31m [FATAL!] We don't have permission to write here! \e[0m"
-	echo -e "\e[1;31m [!] Abandon the ship! \e[0m"
-	echo
-	exit 1
-fi
 
 for PKG in $DEPS
 do
@@ -101,6 +166,7 @@ then
 		echo "Problems installing httprobe!"
 		echo "Please install it manually to use Floki."
 		echo "Bye!"
+		cd ..
 		exit 1
 	fi
 fi
@@ -121,12 +187,47 @@ echo
 echo -e "\e[1;31m [+] All ready! let's look for some subdomains now... \e[0m"
 echo
 
+if [ -d $1 ]
+then
+	tar czvf "backup_${1}_`date +%d%m%y%H%M`.tar.gz" $1 && rm -rf $1
+	if [ $? -ne 0 ];then
+		echo
+		echo -e "\e[1;31m [FATAL!] The $1 directory exists, but we couldn't archive it. (Please, check permissions and disk space.) \e[0m"
+	        echo -e "\e[1;31m [!] Abandon the ship! \e[0m"
+		echo
+		exit 1
+	fi
+fi
+
+mkdir $1
+if [ $? -ne 0 ]; then
+	echo
+	echo -e "\e[1;31m [FATAL!] We don't have permission to write here or disk is full! \e[0m"
+	echo -e "\e[1;31m [!] Abandon the ship! \e[0m"
+	echo
+	exit 1
+fi
+
+cd $1
+
 SUBS="subs-${1}.txt"
 WEBURLS="web-${1}.txt"
 WHATWEBOUT="whatweb-${1}.txt"
 WAFW00FOUT="wafw00f-${1}.txt"
 
-echo $1 |assetfinder --subs-only |tee $SUBS
+zoneTransfer $1 $SUBS
+if [ ! -f zonexfer.tmp ]; then
+
+	#only try to find subdomains if zoneTransfer isn't working
+
+	echo $1 |assetfinder --subs-only |tee $SUBS
+
+	echo
+	echo -e "\e[1;31m [+] Some reverse lookup to find more subdomains... \e[0m"
+	echo
+
+	reverseLookup $SUBS $1
+fi
 
 echo
 echo -e "\e[1;31m [+] Hey, take a look at their Websites! \e[0m"
@@ -141,7 +242,7 @@ echo
 if [ ! -d ./whatweb ];then
 	mkdir whatweb 
 	if [ $? -ne 0 ]; then 
-		echo "[!] Problems creating the whatweb directory."; exit 1
+		echo "[!] Problems creating the whatweb directory."; cd .. ; exit 1
 	fi
 fi
 cat $WEBURLS |while read weburl; do
@@ -167,7 +268,6 @@ cat $WEBURLS |while read line; do
 	fi
 done
 
-
 echo
 echo -e "\e[1;31m [+] Generating Report... \e[0m"
 echo 
@@ -182,5 +282,6 @@ echo -e "\e[1;31m [+] Everything done here. Happy h4ck1ng! \e[0m"
 echo 
 
 firefox $REPORT
-
+rm -f zonexfer.tmp 2>/dev/null
+cd ..
 exit 0
