@@ -233,7 +233,9 @@ echo
 echo -e "\e[1;31m [+] Hey, take a look at their Websites! \e[0m"
 echo
 
-cat $SUBS | httprobe -c 50 -prefer-https |tee $WEBURLS
+cat $SUBS |sort -u | httprobe -c 50 -prefer-https |tee $WEBURLS
+cat $WEBURLS |sort -u > /tmp/floki.tmp
+mv /tmp/floki.tmp $WEBURLS
 
 echo
 echo -e "\e[1;31m [+] What web? \e[0m"
@@ -245,7 +247,7 @@ if [ ! -d ./whatweb ];then
 		echo "[!] Problems creating the whatweb directory."; cd .. ; exit 1
 	fi
 fi
-cat $WEBURLS |while read weburl; do
+cat $WEBURLS |sort -u |while read weburl; do
  OUTFILE=whatweb-`echo $weburl|cut -f3 -d'/'`.txt
  whatweb --log-verbose=whatweb/$OUTFILE $weburl |tee $WHATWEBOUT
 done
@@ -285,3 +287,4 @@ firefox $REPORT
 rm -f zonexfer.tmp 2>/dev/null
 cd ..
 exit 0
+
