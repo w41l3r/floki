@@ -3,7 +3,7 @@
 
  `--- sailing the seas of Reconnaissance
 
- Version: 0.1
+ Version: 0.2
 
 
 Syntax: ./floki.sh domain_name
