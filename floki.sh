@@ -101,6 +101,10 @@ if [ $FIERCEFLAG -eq 1 ];then
 		cat zonexfer.txt subs.txt | sort -u > allsubs.txt
 		mv subs.txt subs.txt.old
 		mv allsubs.txt subs.txt
+  	else
+   		grep -i found fierce.txt | awk '{print $2}'|sed 's/\.$//' > subs-fierce.txt
+     		cat subs-fierce.txt subs.txt | sort -u > allsubs.txt
+       		mv allsubs.txt subs.txt
 	fi	
 fi
 
