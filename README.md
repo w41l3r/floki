@@ -16,7 +16,7 @@
 - knockpy [https://github.com/guelfoweb/knock]
 - nuclei [https://github.com/projectdiscovery/nuclei]
 - mantra [https://github.com/MrEmpy/mantra]
-- nmap
+- nmap [https://nmap.org/download]
 - gowitness(*google-chrome is necessary) [https://github.com/sensepost/gowitness]
 - fierce [https://github.com/mschwager/fierce]
 - assetnote's DNS wordlist [https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt]
