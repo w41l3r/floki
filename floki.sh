@@ -27,7 +27,7 @@
 # !!!remember to configure sudoers to NOPASSWD to run nmap without asking password
 
 DOMAIN=$1
-DEPENDENCIES="amass assetfinder subfinder fierce kkkkkk waybackurls httpx whatweb gowitness nmap nuclei"
+DEPENDENCIES="amass assetfinder subfinder fierce mantra waybackurls httpx whatweb gowitness nmap nuclei"
 WORDLISTS="/opt/tools/wordlists"
 #Wordlists
 #Assetnote DNS wordlist https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt
@@ -118,6 +118,8 @@ if [ -s subs.txt ];then
 		echo -e "\n\\033[33m[*] Starting whatweb...\\033[0m"
 		whatweb -U=Googlebot -i unique-httpx.txt| tee whatweb.txt
 		cat httpx.txt | cut -f3 -d'/' |sort -u > unique-http-subs.txt
+  		echo -e "\n\\033[33m[*] Starting mantra...\\033[0m"
+    		grep '\.js$' httpx.txt | mantra -s -ua Googlebot
 		echo -e "\n\\033[33m[*] Starting gowitness...\\033[0m"
 		gowitness file -f unique-http-subs.txt
 		echo
