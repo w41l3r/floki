@@ -40,6 +40,7 @@ DNSWORDLIST="${WORDLISTS}/best-dns-wordlist.txt"
 cat banner.txt
 
 if [ $# -ne 1 ];then
+ echo
  echo "Syntax: $0 domain_name"
  exit 9
 fi
