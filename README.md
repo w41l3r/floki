@@ -25,4 +25,5 @@
 # !!!remember to configure sudoers to NOPASSWD to run nmap without asking password
 
 Syntax: ./floki.sh domain_name
+
  Example: ./floki.sh evilcorp.com
