@@ -5,39 +5,57 @@
 # v0.1 - 04/01/2024
 #
 # w41l3r
+#
+# To do - function to check/install pre-reqs
+#
+# Pre-reqs:
+# 	- amass [https://github.com/owasp-amass/amass]
+#	- assetfinder [https://github.com/tomnomnom/assetfinder]
+#	- subfinder [https://github.com/projectdiscovery/subfinder]
+#	- httpx [https://github.com/projectdiscovery/httpx]
+#	- whatweb [https://github.com/urbanadventurer/WhatWeb]
+#	- waybackurls [https://github.com/tomnomnom/waybackurls]
+#	- knockpy [https://github.com/guelfoweb/knock]
+#	- nuclei [https://github.com/projectdiscovery/nuclei]
+#	- mantra [https://github.com/MrEmpy/mantra]
+#	- nmap
+#	- gowitness(*google-chrome is necessary) [https://github.com/sensepost/gowitness]
+#	- fierce [https://github.com/mschwager/fierce]
+#	- assetnote's DNS wordlist [https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt]
+#
+# !!manually configure subfinder's provider-config.yaml (API Keys)
+# !!!remember to configure sudoers to NOPASSWD to run nmap without asking password
+
+DOMAIN=$1
+DEPENDENCIES="amass assetfinder subfinder fierce kkkkkk waybackurls httpx whatweb gowitness nmap nuclei"
+WORDLISTS="/opt/tools/wordlists"
+#Wordlists
+#Assetnote DNS wordlist https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt
+DNSWORDLIST="${WORDLISTS}/best-dns-wordlist.txt"
+#WEBWORDLIST="${WORDLISTS}/common.txt"
+
+#
+# dont change anything after here...
+#
 
 if [ $# -ne 1 ];then
  echo "Syntax: $0 domain_name"
  exit 9
 fi
 
-#
-# To do - function to check/install pre-reqs
-#
-# Pre-reqs:
-# 	- amass
-#	- assetfinder
-#	- subfinder
-#	- httpx
-#	- whatweb
-#	- waybackurls
-#	- knockpy
-#	- nuclei
-#	- nmap
-#	- gowitness(*google-chrome is necessary)
-#	- fierce
-#	- assetfinder's DNS wordlist
-#
-# !!manually configure subfinder's provider-config.yaml (API Keys)
-# !!!remember to configure sudoers to NOPASSWD to run nmap without asking password
+#check dependencies/binaries
+function check_deps {
+	which $1 >/dev/null
+ 	if [ $? -ne 0 ];then
+  		echo -e "\n\\033[31m$1 is missing! Please install it and put it on PATH.\\033[0m"
+    		exit 1
+      	fi
+}
 
-DOMAIN=$1
-WORDLISTS="/opt/tools/wordlists"
-
-#Wordlists
-#Assetnote DNS wordlist https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt
-DNSWORDLIST="${WORDLISTS}/best-dns-wordlist.txt"
-#WEBWORDLIST="${WORDLISTS}/common.txt"
+for DEP in $DEPENDENCIES
+do
+	check_deps $DEP
+done
 
 mkdir ${DOMAIN}
 if [ $? -ne 0 ];then
