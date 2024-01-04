@@ -12,7 +12,9 @@ if [ $# -ne 1 ];then
 fi
 
 #
-# To do - function to check/install pre-reqs
+# To do's:
+#	- function to check/install pre-reqs
+#	- some ffuf recon
 #
 # Pre-reqs:
 # 	- amass
