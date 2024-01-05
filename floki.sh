@@ -27,7 +27,7 @@
 # !!!remember to configure sudoers to NOPASSWD to run nmap without asking password
 
 DOMAIN=$1
-DEPENDENCIES="amass assetfinder subfinder fierce mantra waybackurls httpx whatweb gowitness nmap nuclei"
+DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei"
 WORDLISTS="/opt/tools/wordlists"
 #Wordlists
 #Assetnote DNS wordlist https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt
