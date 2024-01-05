@@ -133,10 +133,23 @@ if [ -s subs.txt ];then
 		echo
 	fi
 	echo -e "\n\\033[33m[*] Starting nuclei...\\033[0m"
-	echo -e "\\033[33m This is REALLY going to take some time... pls be patient!"
-	echo
-	cat unique-httpx.txt |nuclei -t ~/.local/nuclei-templates/ -fhr |tee nuclei.txt
-	echo
+        RUNNUCLEI=1
+ 	if [ -d ~/.local/nuclei-templates ];then
+  		NUCLEIDIR="~/.local/nuclei-templates"
+    	elif [ -d ~/nuclei-templates ];then
+     		NUCLEIDIR="~/nuclei-templates"
+        else
+		echo -e "\n\\033[31m[*] No nuclei templates found!\\033[0m"
+  		RUNNUCLEI=0
+        fi
+	if [ $RUNNUCLEI -eq 1 ];then
+		echo -e "\\033[33m This is REALLY going to take some time... pls be patient!"
+		echo
+		cat unique-httpx.txt |nuclei -t $NUCLEIDIR -fhr |tee nuclei.txt
+		echo
+        else
+		echo "Skipping nuclei (didnt find templates dir...)"
+        fi
 	echo -e "\n\\033[33m[*] Starting nmap...\\033[0m"
 	echo
 	sudo nmap -n -v -Pn -sS -p- --open -oA ${DOMAIN} -iL subs.txt
