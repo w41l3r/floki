@@ -22,21 +22,25 @@
 #	- gowitness(*google-chrome is necessary) [https://github.com/sensepost/gowitness]
 #	- puredns [https://github.com/d3mondev/puredns]
 #	- assetnote's DNS wordlist [https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt]
+#	- massdns [https://github.com/blechschmidt/massdns]
 #
 # !!manually configure subfinder's provider-config.yaml (API Keys)
 # !!!remember to configure sudoers to NOPASSWD to run nmap without asking password
 
-DOMAIN=$1
-DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei"
+#Your wordlists directory
 WORDLISTS="/opt/tools/wordlists"
-#Wordlists
 #Assetnote DNS wordlist https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt
 DNSWORDLIST="${WORDLISTS}/best-dns-wordlist.txt"
-#WEBWORDLIST="${WORDLISTS}/common.txt"
+#Nuclei templates directory
+NUCLEIDIR="~/.local/nuclei-templates" 
+#Wordlist to be used with ffuf (coming soon...)
+#WEBWORDLIST="${WORDLISTS}/common.txt" - will be necessary soon..
 
 #
 # dont change anything after here...
 #
+DOMAIN=$1
+
 cat `dirname $0`/banner.txt
 
 if [ $# -ne 1 ];then
@@ -46,6 +50,8 @@ if [ $# -ne 1 ];then
 fi
 
 #check dependencies/binaries
+DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei"
+
 function check_deps {
 	which $1 >/dev/null
  	if [ $? -ne 0 ];then
@@ -58,6 +64,12 @@ for DEP in $DEPENDENCIES
 do
 	check_deps $DEP
 done
+
+#Check nuclei templates
+if [ ! -d $NUCLEIDIR ];then
+  	echo -e "\n\\033[31m[*] No nuclei templates found! Check NUCLEIDIR variable. Bye!\\033[0m"
+  	exit 1
+fi
 
 mkdir ${DOMAIN}
 if [ $? -ne 0 ];then
@@ -81,6 +93,7 @@ do
    		ZONEXFER=1
        fi
 done
+
 echo -e "\n\\033[33m[*] Starting Amass...\\033[0m"
 #amass enum -passive -norecursive -noalts -d ${DOMAIN} -o amass.txt
 amass enum -passive -norecursive -d ${DOMAIN} -o amass.txt
@@ -93,14 +106,10 @@ cat amass.txt assetfinder.txt subfinder.txt | sort -u > subs.txt
 if [ $ZONEXFER -eq 1 ];then
 	cat subs-transfered.txt subs.txt | sort -u > allsubs.txt
  	mv allsubs.txt subs.txt
-fi
-#
-#!!! Starting some active recon here...
-#
 
-if [ $ZONEXFER -eq 1 ];then
 	#if Zonetransfer worked, we dont need DNS brute
  	echo -e "\n\\033[33m[*] Not brute forcing, because Zone Xfer has worked...\\033[0m"
+  
 else    #zonetransfer didnt work... lets do some brute force
 	if [ ! -s $DNSWORDLIST ];then
 		echo -e "\n\\033[31m$DNSWORDLIST empty or inexistent!"
@@ -124,7 +133,9 @@ else    #zonetransfer didnt work... lets do some brute force
 		puredns bruteforce $DNSWORDLIST $DOMAIN -q > puredns.txt
   		if [ $? -ne 0 ];then
     			echo -e "\n\\033[31mError executing the DNS brute.\\033[0m"
-       			
+       			echo -e "\n\\033[31mPlease check if massdns is installed and ~/.config/puredns/resolvers.txt is ok.\\033[0m"
+       			echo -e "\n\\033[31mI recommend generating resolvers.txt file with dnsvalidator.\\033[0m"
+	  		exit 1
 	  	else
   			grep -v '^$' puredns.txt > subs-puredns.txt
      			cat subs-puredns.txt subs.txt | sort -u > allsubs.txt
@@ -136,7 +147,7 @@ else    #zonetransfer didnt work... lets do some brute force
 	
 fi #closes if zonexfer has worked
 
-if [ -s subs.txt ];then
+if [ -s subs.txt ];then #successfully gathered subdomains
 	echo -e "\n\\033[33m[*] Starting waybackurls...\\033[0m"
 	cat subs.txt | waybackurls | tee waybackurls.txt
 	if [ ! -s waybackurls.txt ];then
@@ -158,31 +169,23 @@ if [ -s subs.txt ];then
 		echo -e "\n\\033[33m[*] Finished Gowitness gathering... run 'gowitness server' on $PWD after floki to see results!!\\033[0m"
 		echo
 	fi
-	echo -e "\n\\033[33m[*] Starting nuclei...\\033[0m"
-        RUNNUCLEI=1
- 	if [ -d ~/.local/nuclei-templates ];then
-  		NUCLEIDIR="~/.local/nuclei-templates"
-    	elif [ -d ~/nuclei-templates ];then
-     		NUCLEIDIR="~/nuclei-templates"
-        else
-		echo -e "\n\\033[31m[*] No nuclei templates found!\\033[0m"
-  		RUNNUCLEI=0
-        fi
-	if [ $RUNNUCLEI -eq 1 ];then
-		echo -e "\\033[33m This is REALLY going to take some time... pls be patient!"
-		echo
-		cat unique-httpx.txt |nuclei -t $NUCLEIDIR -fhr |tee nuclei.txt
-		echo
-        else
-		echo "Skipping nuclei (didnt find templates dir...)"
-        fi
-	echo -e "\n\\033[33m[*] Starting nmap...\\033[0m"
+
+ 	#Run Nuclei
+ 	echo -e "\n\\033[33m[*] Starting nuclei...\\033[0m"
+        echo -e "\\033[33m This is REALLY going to take some time... pls be patient!"
+	echo
+	cat unique-httpx.txt |nuclei -t $NUCLEIDIR -fhr |tee nuclei.txt
+
+ 	#Run Nmap
+ 	echo
+      	echo -e "\n\\033[33m[*] Starting nmap...\\033[0m"
 	echo
 	sudo nmap -n -v -Pn -sS -p- --open -oA ${DOMAIN} -iL subs.txt
-else
+ 
+else #no subs found
 	echo
 	echo -e "\n\\033[31m[*]No subdomains found!\\033[0m"
-	exit 0
+	exit 5
 fi
 
 exit 0
