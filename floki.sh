@@ -20,7 +20,7 @@
 #	- mantra [https://github.com/MrEmpy/mantra]
 #	- nmap [https://nmap.org/download]
 #	- gowitness(*google-chrome is necessary) [https://github.com/sensepost/gowitness]
-#	- fierce [https://github.com/mschwager/fierce]
+#	- puredns [https://github.com/d3mondev/puredns]
 #	- assetnote's DNS wordlist [https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt]
 #
 # !!manually configure subfinder's provider-config.yaml (API Keys)
@@ -67,6 +67,20 @@ fi
 
 cd ${DOMAIN}
 
+echo -e "\n\\033[33m[*] Trying Zone Xfer... \\033[0m"
+ZONEXFER=0
+for server in $(host -t ns ${DOMAIN} | cut -d " " -f4)
+do
+	host -l ${DOMAIN} ${server} | tee zonexfer.txt
+ 	if [ $? -ne 0 ];then
+  		echo -e "\n\\033[31m[*] Zone transfer failed!\\033[0m"
+    	else
+     		echo -e "\n\\033[32m YESS!!! it worked!!!\\033[0m"
+       		cat zonexfer.txt
+	 	grep "has address" zonexfer.txt |awk '{print $1}' > subs-transfered.txt
+   		ZONEXFER=1
+       fi
+done
 echo -e "\n\\033[33m[*] Starting Amass...\\033[0m"
 #amass enum -passive -norecursive -noalts -d ${DOMAIN} -o amass.txt
 amass enum -passive -norecursive -d ${DOMAIN} -o amass.txt
@@ -76,40 +90,51 @@ echo -e "\n\\033[33m[*] Starting Subfinder...\\033[0m"
 subfinder -d ${DOMAIN} -silent -pc /etc/subfinder/provider-config.yaml |tee subfinder.txt
 
 cat amass.txt assetfinder.txt subfinder.txt | sort -u > subs.txt
-
+if [ $ZONEXFER -eq 1 ];then
+	cat subs-transfered.txt subs.txt | sort -u > allsubs.txt
+ 	mv allsubs.txt subs.txt
+fi
 #
 #!!! Starting some active recon here...
 #
-FIERCEFLAG=1
-if [ ! -s $DNSWORDLIST ];then
-	echo -e "\n\\033[31m$DNSWORDLIST empty or inexistent!"
-	echo -e "Trying to get it...\\033[0m"
-	wget https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt -O $DNSWORDLIST
-	if [ $? -ne 0 ];then
-		echo -e "\n\\033[31mError downloading the DNS wordlist. Wont use fierce!\\033[0m"
-		FIERCEFLAG=0
-	fi
-fi
-if [ $FIERCEFLAG -eq 1 ];then
-	echo -e "\n\\033[33m[*] Starting Fierce...\\033[0m"
-	echo -e "\\033[33m Relax...you really should go get some coffee...\\033[0m"
-	fierce --domain $DOMAIN --traverse 3 --subdomain-file $DNSWORDLIST > fierce.txt
-	cat fierce.txt
-	if grep "Whoah, it worked" fierce.txt
-	then
-		echo -e "\n\\033[32m Zone transfer has worked!!!...\\033[0m"
-		grep "IN" fierce.txt | sed 's/\.$//g' | awk '{echo -e $1}' > zonexfer.txt
-		cat zonexfer.txt subs.txt | sort -u > allsubs.txt
-		mv subs.txt subs.txt.old
-		mv allsubs.txt subs.txt
-  	else
-   		grep -i found fierce.txt | awk '{print $2}'|sed 's/\.$//' > subs-fierce.txt
-     		cat subs-fierce.txt subs.txt | sort -u > allsubs.txt
-       		mv allsubs.txt subs.txt
-	fi	
-fi
 
-#finished active recon (fierce)
+if [ $ZONEXFER -eq 1 ];then
+	#if Zonetransfer worked, we dont need DNS brute
+ 	echo -e "\n\\033[33m[*] Not brute forcing, because Zone Xfer has worked...\\033[0m"
+else    #zonetransfer didnt work... lets do some brute force
+	if [ ! -s $DNSWORDLIST ];then
+		echo -e "\n\\033[31m$DNSWORDLIST empty or inexistent!"
+		echo -e "Trying to get it...\\033[0m"
+  		if [ ! -d $WORDLISTS ];then
+    			mkdir -p $WORDLISTS
+      			if [ $? -ne 0 ];then
+				echo -e "\n\\033[31mFailed to create Wordlists directory!Check permissions and Disk space.Bye!\\033[0m"
+   				exit 1
+      			fi
+	 	fi
+	 	wget https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt -O $DNSWORDLIST
+	 	if [ $? -ne 0 ];then
+			echo -e "\n\\033[31mError downloading the DNS wordlist. Bye!\\033[0m"
+			exit 1
+	 	fi
+        else #we have everything... lets brute DNS
+		
+		echo -e "\n\\033[33m[*] Starting Puredns...\\033[0m"
+		echo -e "\\033[33m Relax...you really should go get some coffee...\\033[0m"
+		puredns bruteforce $DNSWORDLIST $DOMAIN -q > puredns.txt
+  		if [ $? -ne 0 ];then
+    			echo -e "\n\\033[31mError executing the DNS brute.\\033[0m"
+       			
+	  	else
+  			grep -v '^$' puredns.txt > subs-puredns.txt
+     			cat subs-puredns.txt subs.txt | sort -u > allsubs.txt
+       			mv allsubs.txt subs.txt
+	 		rm -f puredns.txt
+    		fi
+			
+	fi #closes if we have the dns wordlist and resolvers file
+	
+fi #closes if zonexfer has worked
 
 if [ -s subs.txt ];then
 	echo -e "\n\\033[33m[*] Starting waybackurls...\\033[0m"
