@@ -68,7 +68,8 @@ fi
 cd ${DOMAIN}
 
 echo -e "\n\\033[33m[*] Starting Amass...\\033[0m"
-amass enum -passive -norecursive -noalts -d ${DOMAIN} -o amass.txt
+#amass enum -passive -norecursive -noalts -d ${DOMAIN} -o amass.txt
+amass enum -passive -norecursive -d ${DOMAIN} -o amass.txt
 echo -e "\n\\033[33m[*] Starting Assetfinder...\\033[0m"
 assetfinder -subs-only ${DOMAIN} | tee assetfinder.txt
 echo -e "\n\\033[33m[*] Starting Subfinder...\\033[0m"
