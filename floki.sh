@@ -37,7 +37,7 @@ DNSWORDLIST="${WORDLISTS}/best-dns-wordlist.txt"
 #
 # dont change anything after here...
 #
-cat banner.txt
+cat `dirname $0`/banner.txt
 
 if [ $# -ne 1 ];then
  echo
