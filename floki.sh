@@ -2,7 +2,7 @@
 #
 # floki.sh - Viking recon tool
 #
-# v0.5 - 04/01/2024
+# v0.6 - 05/01/2024
 #
 # W41L3R
 #
