@@ -49,6 +49,13 @@ if [ $# -ne 1 ];then
  exit 9
 fi
 
+#check if domain exists
+host -t ns $DOMAIN > /dev/null 2>&1
+if [ $? -ne 0 ];then
+	echo -e "\n\\033[31mThere is something wrong with the domain you are looking for...Bye!\\033[0m"
+ 	exit 1
+fi
+
 #check dependencies/binaries
 DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei"
 
