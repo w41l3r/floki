@@ -18,7 +18,7 @@
 - mantra [https://github.com/MrEmpy/mantra]
 - nmap [https://nmap.org/download]
 - gowitness(*google-chrome is necessary) [https://github.com/sensepost/gowitness]
-- fierce [https://github.com/mschwager/fierce]
+- puredns [https://github.com/d3mondev/puredns]
 - assetnote's DNS wordlist [https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt]
 
 # !!manually configure subfinder's provider-config.yaml (API Keys)
