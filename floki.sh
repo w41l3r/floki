@@ -2,7 +2,7 @@
 #
 # floki.sh - Viking recon tool
 #
-# v0.6 - 05/01/2024
+# v0.6.1 - 05/01/2024
 #
 # W41L3R
 #
@@ -32,7 +32,7 @@ WORDLISTS="/opt/tools/wordlists"
 #Assetnote DNS wordlist https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt
 DNSWORDLIST="${WORDLISTS}/best-dns-wordlist.txt"
 #Nuclei templates directory
-NUCLEIDIR="~/.local/nuclei-templates" 
+NUCLEIDIR="/home/w41l3r/.local/nuclei-templates" 
 #Wordlist to be used with ffuf (coming soon...)
 #WEBWORDLIST="${WORDLISTS}/common.txt" - will be necessary soon..
 
@@ -47,13 +47,6 @@ if [ $# -ne 1 ];then
  echo
  echo "Syntax: $0 domain_name"
  exit 9
-fi
-
-#check if domain exists
-host -t ns $DOMAIN > /dev/null 2>&1
-if [ $? -ne 0 ];then
-	echo -e "\n\\033[31mThere is something wrong with the domain you are looking for...Bye!\\033[0m"
- 	exit 1
 fi
 
 #check dependencies/binaries
@@ -90,20 +83,20 @@ echo -e "\n\\033[33m[*] Trying Zone Xfer... \\033[0m"
 ZONEXFER=0
 for server in $(host -t ns ${DOMAIN} | cut -d " " -f4)
 do
-	host -l ${DOMAIN} ${server} | tee zonexfer.txt
+	host -l ${DOMAIN} ${server}
  	if [ $? -ne 0 ];then
   		echo -e "\n\\033[31m[*] Zone transfer failed!\\033[0m"
     	else
      		echo -e "\n\\033[32m YESS!!! it worked!!!\\033[0m"
-       		cat zonexfer.txt
+		host -l ${DOMAIN} ${server} |tee zonexfer.txt
 	 	grep "has address" zonexfer.txt |awk '{print $1}' > subs-transfered.txt
    		ZONEXFER=1
        fi
 done
 
 echo -e "\n\\033[33m[*] Starting Amass...\\033[0m"
-#amass enum -passive -norecursive -noalts -d ${DOMAIN} -o amass.txt
-amass enum -passive -norecursive -d ${DOMAIN} -o amass.txt
+amass enum -passive -norecursive -noalts -d ${DOMAIN} -o amass.txt
+#amass enum -passive -norecursive -d ${DOMAIN} -o amass.txt
 echo -e "\n\\033[33m[*] Starting Assetfinder...\\033[0m"
 assetfinder -subs-only ${DOMAIN} | tee assetfinder.txt
 echo -e "\n\\033[33m[*] Starting Subfinder...\\033[0m"
