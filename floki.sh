@@ -2,7 +2,7 @@
 #
 # floki.sh - Viking recon tool
 #
-# v0.6.1 - 13/01/2024
+# v0.7 - 14/01/2024
 #
 # W41L3R
 #
@@ -15,7 +15,7 @@
 #	- httpx [https://github.com/projectdiscovery/httpx]
 #	- whatweb [https://github.com/urbanadventurer/WhatWeb]
 #	- waybackurls [https://github.com/tomnomnom/waybackurls]
-#	- knockpy (*soon...) [https://github.com/guelfoweb/knock] 
+#	- knockpy [https://github.com/guelfoweb/knock] 
 #	- nuclei [https://github.com/projectdiscovery/nuclei]
 #	- mantra [https://github.com/MrEmpy/mantra]
 #	- nmap [https://nmap.org/download]
