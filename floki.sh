@@ -49,9 +49,6 @@ if [ $# -ne 1 ];then
  exit 9
 fi
 
-#check dependencies/binaries
-DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei"
-
 function printHelp {
 	echo
  	echo "Syntax: $0 [-h] [-b] domain.com"
@@ -60,6 +57,26 @@ function printHelp {
     	echo
      	exit 9
 }
+
+OPTSTRING=":vb"
+
+while getopts ${OPTSTRING} opt; do
+  case ${opt} in
+    h)
+      printHelp
+      ;;
+    b)
+      BRUTEDNS=1
+      ;;
+    ?)
+      echo "Invalid option: -${OPTARG}."
+      exit 1
+      ;;
+  esac
+done
+
+#check dependencies/binaries
+DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei"
 
 function check_deps {
 	which $1 >/dev/null
@@ -100,22 +117,6 @@ cd ${DOMAIN}
 
 ZONEXFER=0
 BRUTEDNS=0
-OPTSTRING=":vb"
-
-while getopts ${OPTSTRING} opt; do
-  case ${opt} in
-    h)
-      printHelp
-      ;;
-    b)
-      BRUTEDNS=1
-      ;;
-    ?)
-      echo "Invalid option: -${OPTARG}."
-      exit 1
-      ;;
-  esac
-done
 
 echo -e "\n\\033[33m[*] Trying Zone Xfer... \\033[0m"
 
