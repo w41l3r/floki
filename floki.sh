@@ -71,6 +71,16 @@ if [ ! -d $NUCLEIDIR ];then
   	exit 1
 fi
 
+if [ -d ${DOMAIN} ];then
+	BACKUPDIR="${DOMAIN}-`date +%d%b%H%M`.bkp"
+	echo -e "\n\\033[33m[*] Output directory already exists... Renaming it to ${BACKUPDIR} \\033[0m"
+ 	rm -rf ${BACKUPDIR} 2>/dev/null
+  	mv ${DOMAIN} ${BACKUPDIR} 
+   	if [ $? -ne 0 ];then
+    		echo -e "\n\\033[31m[*] Error renaming output dir ${DOMAIN}. Bye!\\033[0m"
+      		exit 1
+      	fi
+fi
 mkdir ${DOMAIN}
 if [ $? -ne 0 ];then
 	echo -e "\n\\033[31m[*] Failed to create output directory. Bye!\\033[0m"
