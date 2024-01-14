@@ -15,7 +15,7 @@
 #	- httpx [https://github.com/projectdiscovery/httpx]
 #	- whatweb [https://github.com/urbanadventurer/WhatWeb]
 #	- waybackurls [https://github.com/tomnomnom/waybackurls]
-#	- knockpy [https://github.com/guelfoweb/knock]
+#	- knockpy (*soon...) [https://github.com/guelfoweb/knock] 
 #	- nuclei [https://github.com/projectdiscovery/nuclei]
 #	- mantra [https://github.com/MrEmpy/mantra]
 #	- nmap [https://nmap.org/download]
