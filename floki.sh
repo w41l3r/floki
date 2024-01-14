@@ -52,6 +52,15 @@ fi
 #check dependencies/binaries
 DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei"
 
+function printHelp {
+	echo
+ 	echo "Syntax: $0 [-h] [-b] domain.com"
+  	echo " -h: Shows this help"
+   	echo " -b: Brute force DNS (requires a dns wordlist. Pls check DNSWORDLIST variable!"
+    	echo
+     	exit 9
+}
+
 function check_deps {
 	which $1 >/dev/null
  	if [ $? -ne 0 ];then
@@ -89,6 +98,23 @@ fi
 
 cd ${DOMAIN}
 
+OPTSTRING=":vb"
+
+while getopts ${OPTSTRING} opt; do
+  case ${opt} in
+    h)
+      printHelp
+      ;;
+    b)
+      BRUTEDNS=1
+      ;;
+    ?)
+      echo "Invalid option: -${OPTARG}."
+      exit 1
+      ;;
+  esac
+done
+
 echo -e "\n\\033[33m[*] Trying Zone Xfer... \\033[0m"
 ZONEXFER=0
 for server in $(host -t ns ${DOMAIN} | cut -d " " -f4)
@@ -121,6 +147,7 @@ if [ $ZONEXFER -eq 1 ];then
  	echo -e "\n\\033[33m[*] Not brute forcing, because Zone Xfer has worked...\\033[0m"
   
 else    #zonetransfer didnt work... lets do some brute force
+   if [ $BRUTEDNS -eq 1 ];then
 	if [ ! -s $DNSWORDLIST ];then
 		echo -e "\n\\033[31m$DNSWORDLIST empty or inexistent!"
 		echo -e "Trying to get it...\\033[0m"
@@ -154,6 +181,7 @@ else    #zonetransfer didnt work... lets do some brute force
     		fi
 			
 	fi #closes if we have the dns wordlist and resolvers file
+      fi #closes if BRUTEDNS equals 1
 	
 fi #closes if zonexfer has worked
 
