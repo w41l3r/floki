@@ -98,6 +98,8 @@ fi
 
 cd ${DOMAIN}
 
+ZONEXFER=0
+BRUTEDNS=0
 OPTSTRING=":vb"
 
 while getopts ${OPTSTRING} opt; do
@@ -116,7 +118,7 @@ while getopts ${OPTSTRING} opt; do
 done
 
 echo -e "\n\\033[33m[*] Trying Zone Xfer... \\033[0m"
-ZONEXFER=0
+
 for server in $(host -t ns ${DOMAIN} | cut -d " " -f4)
 do
 	host -l ${DOMAIN} ${server}
