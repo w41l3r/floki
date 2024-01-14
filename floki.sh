@@ -123,7 +123,7 @@ for server in $(host -t ns ${DOMAIN} | cut -d " " -f4)
 do
 	host -l ${DOMAIN} ${server}
  	if [ $? -ne 0 ];then
-  		echo -e "\n\\033[31m[*] Zone transfer failed!\\033[0m"
+  		echo -e "\n\\033[31m[*] Zone transfer has failed!\\033[0m"
     	else
      		echo -e "\n\\033[32m YESS!!! it worked!!!\\033[0m"
 		host -l ${DOMAIN} ${server} |tee zonexfer.txt
