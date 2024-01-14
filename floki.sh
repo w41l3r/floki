@@ -76,7 +76,7 @@ while getopts ${OPTSTRING} opt; do
 done
 
 #check dependencies/binaries
-DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei"
+DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei knockpy"
 
 function check_deps {
 	which $1 >/dev/null
@@ -189,6 +189,9 @@ else    #zonetransfer didnt work... lets do some brute force
 fi #closes if zonexfer has worked
 
 if [ -s subs.txt ];then #successfully gathered subdomains
+	echo -e "\n\\033[33m[*] Starting knockpy...\\033[0m"
+ 	cat subs.txt| sed "s/.${DOMAIN}$//g" > onlysubs.txt
+  	knockpy --user-agent Googlebot -w ./onlysubs.txt $DOMAIN | tee knockpy.txt
 	echo -e "\n\\033[33m[*] Starting waybackurls...\\033[0m"
 	cat subs.txt | waybackurls | tee waybackurls.txt
 	if [ ! -s waybackurls.txt ];then
