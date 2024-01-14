@@ -9,6 +9,6 @@
 
 Floki - Viking Recon Tool
 
-version: 0.5 (jan-2024)
+version: 0.6.1 (jan-2024)
 
 w41l3r
