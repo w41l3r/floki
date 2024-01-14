@@ -58,7 +58,7 @@ function printHelp {
      	exit 9
 }
 
-OPTSTRING=":vb"
+OPTSTRING=":hb"
 
 while getopts ${OPTSTRING} opt; do
   case ${opt} in
