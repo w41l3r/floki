@@ -35,6 +35,7 @@ DNSWORDLIST="${WORDLISTS}/best-dns-wordlist.txt"
 NUCLEIDIR="/home/w41l3r/.local/nuclei-templates" 
 #Wordlist to be used with ffuf (coming soon...)
 #WEBWORDLIST="${WORDLISTS}/common.txt" - will be necessary soon..
+RESOLVERS="/home/w41l3r/.config/puredns/resolvers.txt"
 
 #
 # dont change anything after here...
@@ -166,11 +167,15 @@ else    #zonetransfer didnt work... lets do some brute force
 			echo -e "\n\\033[31mError downloading the DNS wordlist. Bye!\\033[0m"
 			exit 1
 	 	fi
-        else #we have everything... lets brute DNS
-		
+        else
+		if [ ! -s $RESOLVERS ];then
+  			echo -e "\n\\033[31mResolvers file empty or not found. Please check the RESOLVERS variable.\\033[0m"
+     			echo -e "\n\\033[31mI recommend using dnsvalidator to generate an updated resolvers.txt file.\\033[0m"
+     			exit 1
+		fi
 		echo -e "\n\\033[33m[*] Starting Puredns...\\033[0m"
 		echo -e "\\033[33m Relax...you really should go get some coffee...\\033[0m"
-		puredns bruteforce $DNSWORDLIST $DOMAIN -q > puredns.txt
+		puredns bruteforce $DNSWORDLIST $DOMAIN --resolvers $RESOLVERS -q > puredns.txt
   		if [ $? -ne 0 ];then
     			echo -e "\n\\033[31mError executing the DNS brute.\\033[0m"
        			echo -e "\n\\033[31mPlease check if massdns is installed and ~/.config/puredns/resolvers.txt is ok.\\033[0m"
