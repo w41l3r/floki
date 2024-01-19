@@ -68,22 +68,22 @@ function printHelp {
      	exit 9
 }
 
-OPTSTRING=":hb"
+BRUTEDNS=0
 
-while getopts ${OPTSTRING} opt; do
-  case ${opt} in
-    h)
+if [ $# -eq 2 ];then
+case $2 in
+    "-h")
       printHelp
       ;;
-    b)
+    "-b")
       BRUTEDNS=1
       ;;
-    ?)
-      echo "Invalid option: -${OPTARG}."
+    *)
+      echo "Invalid option: $2 "
       exit 1
       ;;
-  esac
-done
+esac
+fi
 
 #check dependencies/binaries
 DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei knockpy"
@@ -126,7 +126,6 @@ fi
 cd ${DOMAIN}
 
 ZONEXFER=0
-BRUTEDNS=0
 
 echo -e "\n\\033[33m[*] Trying Zone Xfer... \\033[0m"
 
@@ -184,7 +183,7 @@ else    #zonetransfer didnt work... lets do some brute force
 		fi
 		echo -e "\n\\033[33m[*] Starting Puredns...\\033[0m"
 		echo -e "\\033[33m Relax...you really should go get some coffee...\\033[0m"
-		puredns bruteforce $DNSWORDLIST $DOMAIN --resolvers $RESOLVERS -q > puredns.txt
+		puredns bruteforce $DNSWORDLIST $DOMAIN --resolvers $RESOLVERS -t 10 -q > puredns.txt
   		if [ $? -ne 0 ];then
     			echo -e "\n\\033[31mError executing the DNS brute.\\033[0m"
        			echo -e "\n\\033[31mPlease check if massdns is installed and ~/.config/puredns/resolvers.txt is ok.\\033[0m"
