@@ -52,7 +52,7 @@ DOMAIN=$1
 
 cat `dirname $0`/banner.txt
 
-if [ $# -ne 1 ];then
+if [ $# -ne 1 -a $# -ne 2 ];then
  echo
  echo "Syntax: $0 domain_name [-b] [-h]"
  exit 9
