@@ -54,7 +54,7 @@ cat `dirname $0`/banner.txt
 
 if [ $# -ne 1 ];then
  echo
- echo "Syntax: $0 domain_name"
+ echo "Syntax: $0 domain_name [-b] [-h]"
  exit 9
 fi
 
