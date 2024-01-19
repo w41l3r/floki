@@ -29,13 +29,21 @@
 
 #Your wordlists directory
 WORDLISTS="/opt/tools/wordlists"
+#
 #Assetnote DNS wordlist https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt
 DNSWORDLIST="${WORDLISTS}/best-dns-wordlist.txt"
+#
 #Nuclei templates directory
 NUCLEIDIR="/home/w41l3r/.local/nuclei-templates" 
+#
 #Wordlist to be used with ffuf (coming soon...)
 #WEBWORDLIST="${WORDLISTS}/common.txt" - will be necessary soon..
+#
+#Resolvers file to use with puredns
 RESOLVERS="/home/w41l3r/.config/puredns/resolvers.txt"
+#
+#Burp proxy listener to feed (send requests to httpx results)
+BURPROXY="http://127.0.0.1:8080"
 
 #
 # dont change anything after here...
@@ -226,9 +234,30 @@ if [ -s subs.txt ];then #successfully gathered subdomains
 	echo
 	cat unique-httpx.txt |nuclei -t $NUCLEIDIR -fhr |tee nuclei.txt
 
+ 	#Send requests to Burp
+  	echo -e "\n\\033[33m[*] Im going to feed your Burp. Please check if $BURPROXY is listening...\\033[0m"
+   	echo -n -e "\n\\033[33m[*] May i start sending requests to burp(Y|n)? \\033[0m"
+    	read RESP
+     	case $RESP in
+        y|Y)
+		curl -s -v -k $BURPROXY | grep -i burp >/dev/null
+  		if [ $? -eq 0 ];then
+    			cat httpx.txt | awk '{print $1}' | while read linha 
+			do                 
+				curl --proxy $BURPROXY -s -k $linha
+			done
+   		else
+     			echo -e "\n\\033[31mError comunicating with BURP.\\033[0m"
+			
+    		fi
+      
+	;;
+ 	*)
+		echo "ok, no Burp then..."
+  	;;
+   	esac
  	#Run Nmap
- 	echo
-      	echo -e "\n\\033[33m[*] Starting nmap...\\033[0m"
+ 	echo -e "\n\\033[33m[*] Starting nmap...\\033[0m"
 	echo
 	sudo nmap -n -v -Pn -sS -p- --open -oA ${DOMAIN} -iL subs.txt
  
