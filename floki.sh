@@ -54,7 +54,7 @@ function printHelp {
 	echo
  	echo "Syntax: $0 [-h] [-b] domain.com"
   	echo " -h: Shows this help"
-   	echo " -b: Brute force DNS (requires a dns wordlist. Pls check DNSWORDLIST variable!)"
+   	echo " -b: Brute force DNS (requires a dns wordlist and a resolvers file. Pls check the DNSWORDLIST and RESOLVERS variables!)"
     	echo
      	exit 9
 }
