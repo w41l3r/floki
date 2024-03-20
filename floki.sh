@@ -76,7 +76,7 @@ while getopts ${OPTSTRING} opt; do
 done
 
 #check dependencies/binaries
-DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei knockpy"
+DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei knockpy gau katana"
 
 function check_deps {
 	which $1 >/dev/null
@@ -189,6 +189,8 @@ else    #zonetransfer didnt work... lets do some brute force
 fi #closes if zonexfer has worked
 
 if [ -s subs.txt ];then #successfully gathered subdomains
+	WAYBACKURLSFOUND=0
+ 	GAUFOUND=0
 	echo -e "\n\\033[33m[*] Starting knockpy...\\033[0m"
  	cat subs.txt| sed "s/.${DOMAIN}$//g" > onlysubs.txt
   	knockpy --user-agent Googlebot -w ./onlysubs.txt $DOMAIN | tee knockpy.txt
@@ -196,17 +198,30 @@ if [ -s subs.txt ];then #successfully gathered subdomains
 	cat subs.txt | waybackurls | tee waybackurls.txt
 	if [ ! -s waybackurls.txt ];then
 		echo -e "\n\\033[31m[*] No entries found on waybackurls!\\033[0m"
-		continue
+  	else
+   		WAYBACKURLSFOUND=1
 	fi
+ 	cat subs.txt | gau | tee gau.txt
+  	if [ ! -s gau.txt ];then
+		echo -e "\n\\033[31m[*] No entries found by gau!\\033[0m"
+  	else
+   		GAUFOUND=1
+	fi
+ 	if [ $WAYBACKURLSFOUND -eq 0 -a $GAUFOUND -eq 0 ];then
+  		continue
+    	fi
 	echo -e "\n\\033[33m[*] Starting httpx...\\033[0m"
-	cat waybackurls.txt |grep -v "^$"| httpx --follow-redirects -mc 200,302 | tee httpx.txt
+	cat waybackurls.txt gau.txt 2>/dev/null |grep -v "^$"| sort -u | httpx --follow-redirects -mc 200,302 | tee httpx.txt
 	if [ -s httpx.txt ];then
-		cat httpx.txt | cut -f1,2,3 -d'/' | sort -u > unique-httpx.txt
+ 		echo -e "\n\\033[33m[*] Starting crawling...\\033[0m"
+ 		cat httpx.txt | katana -jc >> enpoints.txt
+   		cat enpoints.txt | uro >> final-endpoints.txt
+		cat final-endpoints.txt | cut -f1,2,3 -d'/' | sort -u > unique-httpx.txt
 		echo -e "\n\\033[33m[*] Starting whatweb...\\033[0m"
 		whatweb -U=Googlebot -i unique-httpx.txt| tee whatweb.txt
 		cat httpx.txt | cut -f3 -d'/' |sort -u > unique-http-subs.txt
   		echo -e "\n\\033[33m[*] Starting mantra...\\033[0m"
-    		grep '\.js$' httpx.txt | mantra -s -ua Googlebot
+    		grep '\.js$' final-endpoints.txt | mantra -s -ua Googlebot
 		echo -e "\n\\033[33m[*] Starting gowitness...\\033[0m"
 		gowitness file -f unique-http-subs.txt
 		echo
@@ -221,10 +236,10 @@ if [ -s subs.txt ];then #successfully gathered subdomains
 	cat unique-httpx.txt |nuclei -t $NUCLEIDIR -fhr |tee nuclei.txt
 
  	#Run Nmap
- 	echo
-      	echo -e "\n\\033[33m[*] Starting nmap...\\033[0m"
-	echo
-	sudo nmap -n -v -Pn -sS -p- --open -oA ${DOMAIN} -iL subs.txt
+ 	#echo
+      	#echo -e "\n\\033[33m[*] Starting nmap...\\033[0m"
+	#echo
+	#sudo nmap -n -v -Pn -sS -p- --open -oA ${DOMAIN} -iL subs.txt
  
 else #no subs found
 	echo
