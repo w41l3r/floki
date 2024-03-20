@@ -60,7 +60,7 @@ while getopts ${OPTSTRING} opt; do
 done
 
 #check dependencies/binaries
-DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei knockpy gau katana"
+DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei knockpy gau katana uro"
 
 function check_deps {
 	which $1 >/dev/null
