@@ -207,7 +207,7 @@ if [ -s subs.txt ];then #successfully gathered subdomains
   		continue
     	fi
 	echo -e "\n\\033[33m[*] Starting httpx...\\033[0m"
-	cat waybackurls.txt gau.txt 2>/dev/null |grep -v "^$"| sort -u | httpx --follow-redirects -mc 200,302 | tee httpx.txt
+	grep -i http waybackurls.txt gau.txt 2>/dev/null | sort -u | httpx --follow-redirects -mc 200,302 | tee httpx.txt
 	if [ -s httpx.txt ];then
  		echo -e "\n\\033[33m[*] Starting crawling...\\033[0m"
  		cat httpx.txt | katana -jc >> enpoints.txt
