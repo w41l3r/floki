@@ -1,6 +1,6 @@
 # floki.sh - Viking recon tool
 
- v0.8 - 19/01/2024
+ v0.9 - 20/03/2024
 
  w41l3r
 
@@ -19,6 +19,7 @@
 - nmap [https://nmap.org/download]
 - gowitness(*google-chrome is necessary) [https://github.com/sensepost/gowitness]
 - puredns [https://github.com/d3mondev/puredns]
+- gau [https://github.com/lc/gau]
 - assetnote's DNS wordlist [https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt]
 
 # !!manually configure subfinder's provider-config.yaml (API Keys)
