@@ -25,7 +25,6 @@
 - assetnote's DNS wordlist [https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt]
 
 # !!manually configure subfinder's provider-config.yaml (API Keys)
-# !!!remember to configure sudoers to NOPASSWD to run nmap without asking password
 
 Syntax: ./floki.sh domain_name
 
