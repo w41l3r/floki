@@ -1,8 +1,8 @@
 # floki.sh - Viking recon tool
 
- v0.7 - 14/01/2024
+ v0.9 - 20/03/2024
 
- w41l3r
+ W41L3R
 
  To do - function to check/install pre-reqs
 
@@ -18,6 +18,9 @@
 - mantra [https://github.com/MrEmpy/mantra]
 - nmap [https://nmap.org/download]
 - gowitness(*google-chrome is necessary) [https://github.com/sensepost/gowitness]
+- gau [https://github.com/lc/gau]
+- uro [https://github.com/s0md3v/uro]
+- katana [https://github.com/projectdiscovery/katana]
 - puredns [https://github.com/d3mondev/puredns]
 - assetnote's DNS wordlist [https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt]
 
