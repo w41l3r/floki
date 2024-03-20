@@ -229,7 +229,7 @@ if [ -s subs.txt ];then #successfully gathered subdomains
  	echo -e "\n\\033[33m[*] Starting nuclei...\\033[0m"
         echo -e "\\033[33m This is REALLY going to take some time... pls be patient!"
 	echo
-	cat final-endpoints.txt |nuclei -t $NUCLEIDIR -fhr |tee nuclei.txt
+	cat unique-http-subs.txt |nuclei -t $NUCLEIDIR -fhr |tee nuclei.txt
 
  	#Send requests to Burp
   	echo -e "\n\\033[33m[*] Im going to feed your Burp. Please check if $BURPROXY is listening...\\033[0m"
