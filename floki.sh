@@ -2,30 +2,13 @@
 #
 # floki.sh - Viking recon tool
 #
-# v0.8 - 19/01/2024
+# v0.9 03/2024
 #
 # W41L3R
 #
 # To do - function to check/install pre-reqs
 #
-# Pre-reqs:
-# 	- amass [https://github.com/owasp-amass/amass]
-#	- assetfinder [https://github.com/tomnomnom/assetfinder]
-#	- subfinder [https://github.com/projectdiscovery/subfinder]
-#	- httpx [https://github.com/projectdiscovery/httpx]
-#	- whatweb [https://github.com/urbanadventurer/WhatWeb]
-#	- waybackurls [https://github.com/tomnomnom/waybackurls]
-#	- knockpy [https://github.com/guelfoweb/knock] 
-#	- nuclei [https://github.com/projectdiscovery/nuclei]
-#	- mantra [https://github.com/MrEmpy/mantra]
-#	- nmap [https://nmap.org/download]
-#	- gowitness(*google-chrome is necessary) [https://github.com/sensepost/gowitness]
-#	- puredns [https://github.com/d3mondev/puredns]
-#	- assetnote's DNS wordlist [https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt]
-#	- massdns [https://github.com/blechschmidt/massdns]
-#
 # !!manually configure subfinder's provider-config.yaml (API Keys)
-# !!!remember to configure sudoers to NOPASSWD to run nmap without asking password
 
 #Your wordlists directory
 WORDLISTS="/opt/tools/wordlists"
@@ -86,7 +69,7 @@ esac
 fi
 
 #check dependencies/binaries
-DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei knockpy"
+DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei knockpy gau katana uro"
 
 function check_deps {
 	which $1 >/dev/null
@@ -256,9 +239,9 @@ if [ -s subs.txt ];then #successfully gathered subdomains
   	;;
    	esac
  	#Run Nmap
- 	echo -e "\n\\033[33m[*] Starting nmap...\\033[0m"
-	echo
-	sudo nmap -n -v -Pn -sS -p- --open -oA ${DOMAIN} -iL subs.txt
+ 	#echo -e "\n\\033[33m[*] Starting nmap...\\033[0m"
+	#echo
+	#sudo nmap -n -v -Pn -sS -p- --open -oA ${DOMAIN} -iL subs.txt
  
 else #no subs found
 	echo
