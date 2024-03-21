@@ -27,6 +27,9 @@ RESOLVERS="/home/w41l3r/.config/puredns/resolvers.txt"
 #
 #Burp proxy listener to feed (send requests to httpx results)
 BURPROXY="http://127.0.0.1:8080"
+#
+#SecretFinder program
+SECRETFINDER="/opt/tools/SecretFinder/SecretFinder.py"
 
 #
 # dont change anything after here...
@@ -69,7 +72,7 @@ esac
 fi
 
 #check dependencies/binaries
-DEPENDENCIES="amass assetfinder subfinder puredns mantra waybackurls httpx whatweb gowitness nmap nuclei knockpy gau katana uro"
+DEPENDENCIES="amass assetfinder subfinder puredns waybackurls httpx whatweb gowitness nmap nuclei knockpy gau katana uro"
 
 function check_deps {
 	which $1 >/dev/null
@@ -83,6 +86,13 @@ for DEP in $DEPENDENCIES
 do
 	check_deps $DEP
 done
+
+#Check if SecretFinder is ok
+python3 $SECRETFINDER >/dev/null 2>&1
+if [ $? -ne 2 -a $? -ne 0 ];then
+	echo "Please install SecretFinder and define the SECRETFINDER variable in the beginning of the script."
+ 	exit 1
+fi
 
 #Check nuclei templates
 if [ ! -d $NUCLEIDIR ];then
@@ -216,8 +226,12 @@ if [ -s subs.txt ];then #successfully gathered subdomains
 		echo -e "\n\\033[33m[*] Starting whatweb...\\033[0m"
 		whatweb -U=Googlebot -i unique-httpx.txt| tee whatweb.txt
 		cat httpx.txt | cut -f3 -d'/' |sort -u > unique-http-subs.txt
-  		echo -e "\n\\033[33m[*] Starting mantra...\\033[0m"
-    		grep '\.js$' final-endpoints.txt | mantra -s -ua Googlebot
+  		echo -e "\n\\033[33m[*] Starting SecretFinder...this will take a while...\\033[0m"
+    		sleep 1
+    		grep '\.js$' final-endpoints.txt|uniq|sort|while read thisurl
+      		do
+			python3 $SECRETFINDER -i $thisurl -o cli | tee -a secretfinder.txt
+ 		done
 		echo -e "\n\\033[33m[*] Starting gowitness...\\033[0m"
 		gowitness file -f unique-http-subs.txt
 		echo
