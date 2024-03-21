@@ -15,7 +15,7 @@
 - waybackurls [https://github.com/tomnomnom/waybackurls]
 - knockpy [https://github.com/guelfoweb/knock]
 - nuclei [https://github.com/projectdiscovery/nuclei]
-- mantra [https://github.com/MrEmpy/mantra]
+- SecretFinder [https://github.com/m4ll0k/SecretFinder]
 - nmap [https://nmap.org/download]
 - gowitness(*google-chrome is necessary) [https://github.com/sensepost/gowitness]
 - gau [https://github.com/lc/gau]
