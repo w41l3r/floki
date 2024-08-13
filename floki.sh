@@ -2,7 +2,7 @@
 #
 # floki.sh - Viking recon tool
 #
-# v0.9 03/2024
+# v0.9.1 08/2024
 #
 # W41L3R
 #
@@ -136,7 +136,7 @@ do
 done
 
 echo -e "\n\\033[33m[*] Starting Amass...\\033[0m"
-amass enum -passive -norecursive -noalts -d ${DOMAIN} -o amass.txt
+amass enum -passive -d ${DOMAIN} -o amass.txt
 #amass enum -passive -norecursive -d ${DOMAIN} -o amass.txt
 echo -e "\n\\033[33m[*] Starting Assetfinder...\\033[0m"
 assetfinder -subs-only ${DOMAIN} | tee assetfinder.txt
