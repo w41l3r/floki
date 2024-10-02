@@ -1,12 +1,13 @@
 # floki.sh - Viking recon tool
 
- v0.9 - 20/03/2024
+ v1.0 - 10/2024
 
  w41l3r
 
  To do - function to check/install pre-reqs
 
 # Pre-reqs:
+- revelio [https://github.com/w41l3r/revelio]
 - amass [https://github.com/owasp-amass/amass]
 - assetfinder [https://github.com/tomnomnom/assetfinder]
 - subfinder [https://github.com/projectdiscovery/subfinder]
