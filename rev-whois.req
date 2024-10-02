@@ -1,0 +1,11 @@
+{
+    "apiKey": "xxxxxxxxxxxxxxxxxxxxxxxx",
+    "searchType": "current",
+    "mode": "purchase",
+    "punycode": true,
+    "basicSearchTerms": {
+        "include": [
+            "OWNER_NAME"
+        ]
+    }
+}
